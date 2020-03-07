@@ -8,8 +8,12 @@
         <el-input v-model="form.type" />
       </el-form-item>
       <el-form-item label="内容">
+<<<<<<< HEAD
         <!-- <tinymce ref="con" /> -->
         <markdown ref="con" />
+=======
+        <tinymce ref="con" />
+>>>>>>> 196ffff1cccf8d8241ec593f639bd0fd78707d47
       </el-form-item>
       <el-form-item label="时间" prop="date">
         <!-- 日期时间选择器 -->
@@ -48,10 +52,16 @@ import { qiniutoken } from "@/api/qiniu";
 import * as qiniu from "qiniu-js";
 // 引入封装好的tinymce
 import tinymce from "../../tinymce/tinymce.vue";
+<<<<<<< HEAD
 import markdown from "../../markdown";
 
 export default {
   components: { tinymce,markdown },
+=======
+
+export default {
+  components: { tinymce },
+>>>>>>> 196ffff1cccf8d8241ec593f639bd0fd78707d47
   data() {
     return {
       token: "",

@@ -13,8 +13,12 @@
       <el-form-item label="内容">
         <!-- tinymce -->
         <!-- <tinymceeditor id="tinymce" v-model="form.content" :init="init" /> -->
+<<<<<<< HEAD
         <!-- <tinymce1 ref="con" /> -->
         <markdown ref="con" />
+=======
+        <tinymce1 ref="con" />
+>>>>>>> 196ffff1cccf8d8241ec593f639bd0fd78707d47
       </el-form-item>
       <el-form-item label="时间" prop="date">
         <!-- 日期时间选择器 -->
@@ -34,14 +38,21 @@
           class="upload-demo"
           list-type="picture-card"
           action
+<<<<<<< HEAD
           :file-list="oldimg"
+=======
+          :file-list="form.oldimg"
+>>>>>>> 196ffff1cccf8d8241ec593f639bd0fd78707d47
           :limit="1"
         >
           <!-- <el-button size="small" type="primary">点击上传</el-button> -->
           <i class="el-icon-plus"></i>
         </el-upload>
+<<<<<<< HEAD
         {{this.newimg}}
         <!-- {{this.oldimg[0].url}} -->
+=======
+>>>>>>> 196ffff1cccf8d8241ec593f639bd0fd78707d47
         <el-progress :text-inside="true" :stroke-width="18" :percentage="jindu" />
       </el-form-item>
       <el-form-item>
@@ -54,7 +65,10 @@
 <script>
 // 引入封装好的tinymce
 import tinymce1 from "../../tinymce/tinymce.vue";
+<<<<<<< HEAD
 import markdown from "../../markdown";
+=======
+>>>>>>> 196ffff1cccf8d8241ec593f639bd0fd78707d47
 // 引入api
 import { findarticle, editarticle } from "@/api/article";
 import { qiniutoken, delqiniuimg } from "@/api/qiniu";
@@ -62,7 +76,11 @@ import { qiniutoken, delqiniuimg } from "@/api/qiniu";
 import * as qiniu from "qiniu-js";
 
 export default {
+<<<<<<< HEAD
   components: { tinymce1,markdown },
+=======
+  components: { tinymce1 },
+>>>>>>> 196ffff1cccf8d8241ec593f639bd0fd78707d47
   data() {
     return {
       form: {
@@ -71,9 +89,15 @@ export default {
         type: "",
         content: "",
         date: "",
+<<<<<<< HEAD
         img: null
       },
       oldimg: [],
+=======
+        img: [],
+        oldimg: []
+      },
+>>>>>>> 196ffff1cccf8d8241ec593f639bd0fd78707d47
       newimg: null,
       rules: {
         date: [{ required: true, message: "请填写日期时间" }]
@@ -97,12 +121,19 @@ export default {
         if (res.list.rows[0].img) {
           console.log(res.list.rows[0].img);
           console.log("121111111111111");
+<<<<<<< HEAD
           this.oldimg.push({
             name: res.list.rows[0].img,
             url: res.list.rows[0].img
           });
           console.log(this.oldimg[0].url);
           this.newimg = res.list.rows[0].img;
+=======
+          this.form.oldimg.push({
+            name: res.list.rows[0].img,
+            url: res.list.rows[0].img
+          });
+>>>>>>> 196ffff1cccf8d8241ec593f639bd0fd78707d47
           console.log("===========");
         }
       })
@@ -260,6 +291,7 @@ export default {
       this.$refs["form"].validate(async valid => {
         if (valid) {
           console.log("表单验证通过！");
+<<<<<<< HEAD
           if (this.oldimg.length == 0) {
             // if (this.oldimg.length == 0 && this.newimg != null) {
             if (this.newimg != null) {
@@ -309,6 +341,45 @@ export default {
               this.form.img = this.oldimg[0].name;
               this.editarticle(this.form);
             }
+=======
+          if (this.form.oldimg.length == 0 && this.newimg == null) {
+            console.log("111111111");
+            this.form.img = null;
+            this.editarticle(this.form);
+          }
+          if (this.form.oldimg.length == 1 && this.newimg == null) {
+            // 如果只删除七牛云图片，除了修改数据库还要把七牛云图片删了
+            console.log(
+              "如果只删除七牛云图片，除了修改数据库还要把七牛云图片删了"
+            );
+            this.delqiniuimg(this.form.oldimg[0].name)
+              .then(() => {
+                this.form.img = null;
+                this.editarticle(this.form);
+              })
+              .catch(err => {
+                console.log(err);
+              });
+          }
+          // 原本有封面图的先删除旧封面图再上传新封面图，再修改数据库
+          if (this.form.oldimg.length == 1 && this.newimg != null) {
+            console.log("22222222222222");
+            await this.delqiniuimg(this.form.oldimg[0].name);
+            var gettoken = await this.getqiniutoken();
+            this.token = gettoken;
+            await this.upqiniuimg();
+            await this.editarticle(this.form);
+          }
+          if (this.form.oldimg.length == 0 && this.newimg != null) {
+            // 原本没有封面图的不用删直接上传新封面图，再修改数据库
+            console.log(this.newimg);
+
+            console.log("原本没有封面图的不用删直接上传新封面图，再修改数据库");
+            var gettoken = await this.getqiniutoken();
+            this.token = gettoken;
+            await this.upqiniuimg();
+            await this.editarticle(this.form);
+>>>>>>> 196ffff1cccf8d8241ec593f639bd0fd78707d47
           }
         } else {
           alert("请填写完整！");
