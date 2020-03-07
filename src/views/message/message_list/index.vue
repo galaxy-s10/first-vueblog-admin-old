@@ -24,11 +24,7 @@
       </el-table-column>
       <el-table-column label="被回复人" align="center">
         <template slot-scope="scope">
-<<<<<<< HEAD
           <span style="white-space:nowrap">{{ scope.row.to_user?scope.row.to_user.username:'无' }}</span>
-=======
-          <span style="white-space:nowrap">{{ scope.row.to_username?scope.row.to_username:'无' }}</span>
->>>>>>> 196ffff1cccf8d8241ec593f639bd0fd78707d47
         </template>
       </el-table-column>
       <el-table-column align="center" label="留言时间" width="200">
