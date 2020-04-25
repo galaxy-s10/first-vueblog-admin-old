@@ -19,8 +19,8 @@
       </el-table-column>
       <el-table-column label="头像" align="center">
         <template slot-scope="scope">
-          <img v-if="scope.row.avatar !== '无'" :src="scope.row.avatar" alt width="50" height="50" />
-          <span v-else>{{ scope.row.avatar }}</span>
+          <img v-if="scope.row.avatar !== null" :src="scope.row.avatar" width="50" height="50" />
+          <span v-else>无</span>
         </template>
       </el-table-column>
       <el-table-column label="权限" align="center">

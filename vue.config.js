@@ -39,9 +39,8 @@ module.exports = {
     },
     proxy: {
       '/api': {
-        // target: 'http://47.100.90.12:3000/',
-        // target: 'http://localhost:3003',
         target: 'http://www.zhengbeining.com:3003',
+        // target: 'http://localhost:3003',
         ws: true,
         changeOrigin: true,
         pathRewrite: {

@@ -49,7 +49,6 @@ import * as qiniu from "qiniu-js";
 // 引入封装好的tinymce
 import tinymce from "../../tinymce/tinymce.vue";
 import markdown from "../../markdown";
-
 export default {
   components: { tinymce,markdown },
   data() {
@@ -168,7 +167,7 @@ export default {
                   complete(ress) {
                     // 接收上传完成后的后端返回信息
                     console.log("上传封面图成功！");
-                    ooo.form.img = "http://img.cdn.zhengbeining.com/" + ress.key;
+                    ooo.form.img = "https://img.cdn.zhengbeining.com/" + ress.key;
                     // 发表文章
                     console.log(ooo.form);
                     addarticle(ooo.form)
@@ -200,4 +199,3 @@ export default {
   }
 };
 </script>
-

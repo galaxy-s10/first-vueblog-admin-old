@@ -52,6 +52,7 @@
 </template>
 
 <script>
+import axios from "axios";
 // 引入封装好的tinymce
 import tinymce1 from "../../tinymce/tinymce.vue";
 import markdown from "../../markdown";
@@ -62,7 +63,7 @@ import { qiniutoken, delqiniuimg } from "@/api/qiniu";
 import * as qiniu from "qiniu-js";
 
 export default {
-  components: { tinymce1,markdown },
+  components: { tinymce1, markdown },
   data() {
     return {
       form: {
@@ -146,8 +147,10 @@ export default {
     },
     // 覆盖默认的上传行为，可以自定义上传的实现
     handleUpload(res) {
+      let formData = new FormData();
+      formData.append("avatar", res.file);
       console.log(res.file);
-      this.newimg = res.file;
+      this.newimg = formData;
     },
     // 文件列表移除文件时的钩子
     handleRemove() {
@@ -158,87 +161,6 @@ export default {
       this.$message({
         message: "只能上传一张封面图",
         type: "error"
-      });
-    },
-    // 获取七牛云上传凭证
-    getqiniutoken() {
-      console.log("开始获取七牛云上传凭证");
-      return new Promise(function(resolve, reject) {
-        qiniutoken()
-          .then(res => {
-            console.log("获取七牛云上传凭证成功！");
-            resolve(res.uploadToken);
-          })
-          .catch(err => {
-            console.log("获取七牛云上传凭证响应失败！");
-            reject(err);
-          });
-      });
-    },
-    // 上传七牛云图片
-    async upqiniuimg() {
-      var datetime = new Date();
-      var key = datetime.getTime() + this.newimg.name;
-      var uptoken = this.token;
-      var putExtra = {
-        fname: "",
-        params: {},
-        mimeType: ["image/png", "image/jpeg", "image/gif"]
-      };
-      var config = {
-        useCdnDomain: true
-      };
-      var observable = qiniu.upload(
-        this.newimg,
-        key,
-        uptoken,
-        putExtra,
-        config
-      );
-      console.log("开始上传图片");
-      var ooo = this; // 获取vm实例this
-      var res = await new Promise(function(resolve, reject) {
-        var subscription = observable.subscribe({
-          next(res) {
-            // 接收上传进度信息
-            var percent = res.total.percent;
-            ooo.jindu = percent.toFixed();
-            ooo.jindu = Number(ooo.jindu);
-            console.log("上传进度：" + ooo.jindu);
-          },
-          error(err) {
-            // 上传错误后触发
-            console.log("上传错误");
-            reject(err);
-          },
-          complete(res) {
-            // 接收上传完成后的后端返回信息
-            console.log("上传完成！");
-            ooo.form.img = "http://img.cdn.zhengbeining.com/" + res.key;
-            resolve(res);
-          }
-        });
-      });
-    },
-    // 删除七牛云图片
-    delqiniuimg(data) {
-      console.log("开始删除七牛云图片");
-      console.log(data);
-      return new Promise(function(resolve, reject) {
-        delqiniuimg(data)
-          .then(res => {
-            if (res.code === 20000) {
-              console.log("删除七牛云图片成功！");
-              resolve(res.data);
-            } else {
-              console.log("删除七牛云图片失败");
-              resolve(res.data);
-            }
-          })
-          .catch(err => {
-            console.log("删除七牛云图片响应失败");
-            console.log(err);
-          });
       });
     },
     // 修改文章
@@ -268,9 +190,14 @@ export default {
               console.log(
                 "原本没有封面图的不用删直接上传新封面图，再修改数据库"
               );
-              var gettoken = await this.getqiniutoken();
-              this.token = gettoken;
-              await this.upqiniuimg();
+              const config = {
+                headers: {
+                  "Content-Type": "multipart/form-data"
+                }
+              };
+              var file = await axios.post("/api/upload", this.newimg, config);
+              var filename = file.data.file.filename;
+              this.form.img = "/api/" + filename;
               await this.editarticle(this.form);
             } else {
               console.log("111111111");
@@ -286,22 +213,20 @@ export default {
               console.log(
                 "如果只删除七牛云图片，除了修改数据库还要把七牛云图片删了"
               );
-              this.delqiniuimg(this.oldimg[0].name)
-                .then(() => {
-                  this.form.img = null;
-                  this.editarticle(this.form);
-                })
-                .catch(err => {
-                  console.log(err);
-                });
+              this.form.img = null;
+              this.editarticle(this.form);
             }
             if (this.oldimg[0].name != this.newimg) {
               // 原本有封面图的先删除旧封面图再上传新封面图，再修改数据库
               console.log("22222222222222");
-              await this.delqiniuimg(this.oldimg[0].name);
-              var gettoken = await this.getqiniutoken();
-              this.token = gettoken;
-              await this.upqiniuimg();
+              const config = {
+                headers: {
+                  "Content-Type": "multipart/form-data"
+                }
+              };
+              var file = await axios.post("/api/upload", this.newimg, config);
+              var filename = file.data.file.filename;
+              this.form.img = "/api/" + filename;
               await this.editarticle(this.form);
             } else {
               console.log("sdfsdgd");
