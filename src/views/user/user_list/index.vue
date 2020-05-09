@@ -78,12 +78,19 @@ export default {
         });
     },
     fetchData() {
-      this.listLoading = true;
-      userList().then(response => {
-        console.log(response);
-        this.list = response.list;
-        this.listLoading = false;
-      });
+      if (this.$store.state.user.role != "admin") {
+        this.$message({
+          message: "您没权限查看所有用户哦~",
+          type: "warning"
+        });
+      } else {
+        this.listLoading = true;
+        userList().then(response => {
+          console.log(response);
+          this.list = response.list;
+          this.listLoading = false;
+        });
+      }
     },
     // 格式化日期时间
     dateFormat: function(time) {

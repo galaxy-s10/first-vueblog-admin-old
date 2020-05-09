@@ -182,57 +182,65 @@ export default {
       this.$refs["form"].validate(async valid => {
         if (valid) {
           console.log("表单验证通过！");
-          if (this.oldimg.length == 0) {
-            // if (this.oldimg.length == 0 && this.newimg != null) {
-            if (this.newimg != null) {
-              // 原本没有封面图的不用删直接上传新封面图，再修改数据库
-              console.log(this.newimg);
-              console.log(
-                "原本没有封面图的不用删直接上传新封面图，再修改数据库"
-              );
-              const config = {
-                headers: {
-                  "Content-Type": "multipart/form-data"
-                }
-              };
-              var file = await axios.post("/api/upload", this.newimg, config);
-              var filename = file.data.file.filename;
-              this.form.img = "/api/" + filename;
-              await this.editarticle(this.form);
-            } else {
-              console.log("111111111");
-              this.form.img = null;
-              this.editarticle(this.form);
-            }
+          if (this.$store.state.user.role != "admin") {
+            this.$message({
+              message: "您没权限修改哦~",
+              type: "warning"
+            });
           } else {
-            console.log("sssssssssssssss");
-            console.log(this.oldimg[0].name);
-            console.log(this.newimg);
-            if (this.newimg == null) {
-              // 如果只删除七牛云图片，除了修改数据库还要把七牛云图片删了
-              console.log(
-                "如果只删除七牛云图片，除了修改数据库还要把七牛云图片删了"
-              );
-              this.form.img = null;
-              this.editarticle(this.form);
-            }
-            if (this.oldimg[0].name != this.newimg) {
-              // 原本有封面图的先删除旧封面图再上传新封面图，再修改数据库
-              console.log("22222222222222");
-              const config = {
-                headers: {
-                  "Content-Type": "multipart/form-data"
-                }
-              };
-              var file = await axios.post("/api/upload", this.newimg, config);
-              var filename = file.data.file.filename;
-              this.form.img = "/api/" + filename;
-              await this.editarticle(this.form);
+            if (this.oldimg.length == 0) {
+              // if (this.oldimg.length == 0 && this.newimg != null) {
+              if (this.newimg != null) {
+                // 原本没有封面图的不用删直接上传新封面图，再修改数据库
+                console.log(this.newimg);
+                console.log;
+                console.log(
+                  "原本没有封面图的不用删直接上传新封面图，再修改数据库"
+                );
+                const config = {
+                  headers: {
+                    "Content-Type": "multipart/form-data"
+                  }
+                };
+                var file = await axios.post("/api/upload", this.newimg, config);
+                var filename = file.data.file.filename;
+                this.form.img = "/api/" + filename;
+                await this.editarticle(this.form);
+              } else {
+                console.log("111111111");
+                this.form.img = null;
+                this.editarticle(this.form);
+              }
             } else {
-              console.log("sdfsdgd");
+              console.log("sssssssssssssss");
               console.log(this.oldimg[0].name);
-              this.form.img = this.oldimg[0].name;
-              this.editarticle(this.form);
+              console.log(this.newimg);
+              if (this.newimg == null) {
+                // 如果只删除七牛云图片，除了修改数据库还要把七牛云图片删了
+                console.log(
+                  "如果只删除七牛云图片，除了修改数据库还要把七牛云图片删了"
+                );
+                this.form.img = null;
+                this.editarticle(this.form);
+              }
+              if (this.oldimg[0].name != this.newimg) {
+                // 原本有封面图的先删除旧封面图再上传新封面图，再修改数据库
+                console.log("22222222222222");
+                const config = {
+                  headers: {
+                    "Content-Type": "multipart/form-data"
+                  }
+                };
+                var file = await axios.post("/api/upload", this.newimg, config);
+                var filename = file.data.file.filename;
+                this.form.img = "/api/" + filename;
+                await this.editarticle(this.form);
+              } else {
+                console.log("sdfsdgd");
+                console.log(this.oldimg[0].name);
+                this.form.img = this.oldimg[0].name;
+                this.editarticle(this.form);
+              }
             }
           }
         } else {

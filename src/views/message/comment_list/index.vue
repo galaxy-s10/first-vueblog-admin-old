@@ -99,7 +99,6 @@ export default {
     fetchData() {
       this.listLoading = true;
       all().then(response => {
-        console.log(response);
         this.list = response;
         this.listLoading = false;
       });

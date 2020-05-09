@@ -37,7 +37,7 @@
         <template slot-scope="scope">
           <el-button type="danger" @click="del(scope.row.id)">删除</el-button>
         </template>
-      </el-table-column> -->
+      </el-table-column>-->
     </el-table>
   </div>
 </template>
@@ -93,7 +93,6 @@ export default {
     fetchData() {
       this.listLoading = true;
       commentlist(-1).then(response => {
-        console.log(response);
         this.list = response.lists;
         this.listLoading = false;
       });

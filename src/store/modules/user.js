@@ -46,6 +46,7 @@ const actions = {
           reject('账号或密码错误！')
         }
       }).catch(error => {
+        reject('账号或密码错误！')
         console.log(error)
       })
     })

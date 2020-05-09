@@ -144,33 +144,40 @@ export default {
       });
     },
     del: function(id, img) {
-      console.log(id, img);
-      this.$confirm("是否永久删除该文章", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning"
-      })
-        .then(() => {
-          var that = this;
-          if (img !== null) {
-            that
-              .delqiniuimg(img)
-              .then(res => {
-                that.delarticle(id);
-              })
-              .catch(err => {
-                console.log(err);
-              });
-          } else {
-            that.delarticle(id);
-          }
-        })
-        .catch(() => {
-          this.$message({
-            type: "info",
-            message: "已取消删除"
-          });
+      if (this.$store.state.user.role != "admin") {
+        this.$message({
+          message: "您没权限删除文章哦~",
+          type: "warning"
         });
+      } else {
+        console.log(id, img);
+        this.$confirm("是否永久删除该文章", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        })
+          .then(() => {
+            var that = this;
+            if (img !== null) {
+              that
+                .delqiniuimg(img)
+                .then(res => {
+                  that.delarticle(id);
+                })
+                .catch(err => {
+                  console.log(err);
+                });
+            } else {
+              that.delarticle(id);
+            }
+          })
+          .catch(() => {
+            this.$message({
+              type: "info",
+              message: "已取消删除"
+            });
+          });
+      }
     }
   }
 };
