@@ -70,6 +70,7 @@ const actions = {
         }
       }).catch(error => {
         console.log(error)
+        reject('登录失效，请重新登录!')
       })
     })
     // return new Promise((resolve, reject) => {

@@ -78,6 +78,7 @@ service.interceptors.response.use(
   },
   // 响应失败
   error => {
+    console.log('object');
     console.log(error) // for debug
     Message({
       message: error.message,
