@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-export function articlelist(ordername, orderby) {
+export function articleList(ordername, orderby) {
   return request({
     url: '/api/article',
     method: 'get',
@@ -29,7 +29,7 @@ export function articlepage(ordername, orderby, type, nowpage, pagesize) {
     }
   })
 }
-export function findarticle(id, title) {
+export function findArticle(id, title) {
   return request({
     url: '/api/article/find',
     method: 'get',
@@ -39,25 +39,25 @@ export function findarticle(id, title) {
     }
   })
 }
-export function addarticle(data) {
+export function addArticle(data) {
   return request({
     url: '/api/article/add',
     method: 'post',
     data
   })
 }
-export function editarticle(data) {
+export function editArticle(data) {
   return request({
     url: '/api/article/edit',
-    method: 'post',
+    method: 'put',
     data
   })
 }
-export function delarticle(id) {
+export function delArticle(id) {
   return request({
     url: '/api/article/del',
-    method: 'get',
-    params: {
+    method: 'delete',
+    data: {
       id
     }
   })

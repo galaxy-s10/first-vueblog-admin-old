@@ -31,26 +31,3 @@ export function addcomment(data) {
     data
   })
 }
-export function addcommenta(data) {
-  return request({
-    url: '/api/message/addcomment',
-    method: 'post',
-    data
-  })
-}
-export function editmessage(data) {
-  return request({
-    url: '/api/message/edit',
-    method: 'post',
-    data
-  })
-}
-export function delmessage(messageid) {
-  return request({
-    url: '/api/message/del',
-    method: 'get',
-    params: {
-      messageid
-    }
-  })
-}

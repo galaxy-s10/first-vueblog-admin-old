@@ -20,11 +20,6 @@
       <el-table-column label="分类" align="center">
         <template slot-scope="{row}">{{ row.type }}</template>
       </el-table-column>
-      <el-table-column label="内容" align="center">
-        <template slot-scope="scope">
-          <span style="white-space:nowrap">{{ scope.row.content }}</span>
-        </template>
-      </el-table-column>
       <el-table-column class-name="status-col" label="封面图" align="center">
         <template slot-scope="scope">
           <img v-if="scope.row.img" :src="scope.row.img" alt width="50" height="50" />
@@ -39,7 +34,10 @@
       </el-table-column>
       <el-table-column align="center" label="操作" width="200">
         <template slot-scope="scope">
-          <el-button type="danger" @click="del(scope.row.id,scope.row.img)">删除</el-button>
+          <el-button
+            type="danger"
+            @click="delArticle(scope.row.id,scope.row.content,scope.row.img)"
+          >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -47,23 +45,36 @@
 </template>
 
 <script>
-import { articlelist, delarticle } from "@/api/article";
-import { delqiniuimg } from "@/api/qiniu";
+import { articleList, delArticle } from "@/api/article";
+import { delQiniuImg } from "@/api/qiniu";
 
 export default {
   data() {
     return {
+      qiniuToken: null,
       list: null,
       listLoading: true
     };
   },
   created() {
-    this.fetchData();
+    this.getArticleList();
   },
   methods: {
-    fetchData() {
+    // 删除七牛云图片
+    async delQiniuImg(filename) {
+      return new Promise(function(resolve, reject) {
+        delQiniuImg(filename.slice(33))
+          .then(res => {
+            resolve(res);
+          })
+          .catch(err => {
+            reject("删除七牛云图片错误");
+          });
+      });
+    },
+    getArticleList() {
       this.listLoading = true;
-      articlelist()
+      articleList()
         .then(res => {
           this.list = res.list.rows;
           this.listLoading = false;
@@ -73,7 +84,7 @@ export default {
         });
     },
     // 格式化日期时间
-    dateFormat: function(time) {
+    dateFormat(time) {
       var date = new Date(time);
       var year = date.getFullYear();
       /* 在日期格式中，月份是从0开始的，因此要加0
@@ -105,79 +116,48 @@ export default {
         seconds
       );
     },
-    // 删除文章记录
-    delarticle: function(id) {
-      console.log("开始删除文章记录");
-      delarticle(id)
-        .then(res => {
-          this.$message({
-            message: res,
-            type: "success"
-          });
-          console.log("删除文章记录完成！");
-          this.fetchData();
-        })
-        .catch(err => {
-          console.log("删除文章记录响应失败！");
-          console.log(err);
-          this.fetchData();
-        });
-    },
-    // 删除七牛云图片
-    delqiniuimg(img) {
-      console.log("开始删除七牛云图片");
-      return new Promise(function(resolve, reject) {
-        delqiniuimg(img)
-          .then(res => {
-            if (res.code === 20000) {
-              console.log("删除七牛云图片成功！");
-              resolve(res.data);
-            } else {
-              console.log("删除七牛云图片失败");
-              resolve(res.data);
-            }
-          })
-          .catch(err => {
-            console.log("删除七牛云图片响应失败");
-            reject(err);
-          });
-      });
-    },
-    del: function(id, img) {
-      if (this.$store.state.user.role != "admin") {
-        this.$message({
-          message: "您没权限删除文章哦~",
-          type: "warning"
-        });
-      } else {
-        console.log(id, img);
-        this.$confirm("是否永久删除该文章", "提示", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning"
-        })
-          .then(() => {
-            var that = this;
-            if (img !== null) {
-              that
-                .delqiniuimg(img)
-                .then(res => {
-                  that.delarticle(id);
-                })
-                .catch(err => {
-                  console.log(err);
-                });
-            } else {
-              that.delarticle(id);
-            }
-          })
-          .catch(() => {
-            this.$message({
-              type: "info",
-              message: "已取消删除"
+    delArticle: function(id, mdContent, img) {
+      this.$confirm("是否永久删除该文章", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          const reg = /https:\/\/img.cdn.zhengbeining.com\/.+?(jpg|png|jpeg)/g;
+          const qiniuImgs = mdContent.match(reg);
+          if (qiniuImgs) {
+            qiniuImgs.forEach(item => {
+              this.delQiniuImg(item).then(res => {
+                console.log(res);
+              });
             });
+          }
+          if (img) {
+            this.delQiniuImg(img).then(res => {
+              console.log(res);
+            });
+          }
+          delArticle(id)
+            .then(res => {
+              this.$message({
+                message: res,
+                type: "success"
+              });
+              this.getArticleList();
+            })
+            .catch(err => {
+              this.$notify.error({
+                title: "错误",
+                message: "删除文章失败！"
+              });
+            });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
           });
-      }
+        });
     }
   }
 };

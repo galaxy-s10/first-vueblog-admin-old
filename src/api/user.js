@@ -23,9 +23,9 @@ export function register(data) {
   })
 }
 
-export function getinfo(token) {
+export function getUserInfo(token) {
   return request({
-    url: '/api/user/getinfo',
+    url: '/api/user/getuserinfo',
     method: 'get',
     // es6简写
     // params: { token }
@@ -34,28 +34,38 @@ export function getinfo(token) {
     }
   })
 }
-export function find(username) {
+
+export function find(id) {
   return request({
     url: '/api/user/find',
     method: 'get',
     params: {
-      username
+      id
     }
   })
 }
 
-export function logout() {
+export function add(data) {
   return request({
-    url: '/user/logout',
-    method: 'post'
+    url: '/api/user/add',
+    method: 'post',
+    data
+  })
+}
+
+export function edit(data) {
+  return request({
+    url: '/api/user/edit',
+    method: 'put',
+    data
   })
 }
 
 export function deluser(id) {
   return request({
     url: '/api/user/del',
-    method: 'get',
-    params:{
+    method: 'delete',
+    data: {
       id
     }
   })

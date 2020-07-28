@@ -15,7 +15,7 @@
       </el-table-column>
       <el-table-column label="文章标题" align="center">
         <template slot-scope="scope">
-          <span style="white-space:nowrap">{{ scope.row.Article.title }}</span>
+          <span style="white-space:nowrap">{{ scope.row.article.title }}</span>
         </template>
       </el-table-column>
       <el-table-column label="留言人" align="center">
@@ -36,7 +36,7 @@
       <el-table-column align="center" label="留言时间" width="200">
         <template slot-scope="scope">
           <i class="el-icon-time" />
-          <span>{{ dateFormat(scope.row.date) }}</span>
+          <span>{{ dateFormat(scope.row.createdAt) }}</span>
         </template>
       </el-table-column>
       <!-- <el-table-column align="center" label="操作" width="200">
@@ -127,7 +127,6 @@ export default {
               this.fetchData();
             })
             .catch(err => {
-              console.log("删除留言响应失败");
               console.log(err);
             });
         })

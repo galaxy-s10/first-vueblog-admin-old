@@ -1,4 +1,4 @@
-import { login, logout, getinfo } from '@/api/user'
+import { login, logout, getUserInfo } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { resetRouter } from '@/router'
 
@@ -25,8 +25,6 @@ const mutations = {
 }
 
 const actions = {
-  // user login
-  // es6参数解构写法
   login({ commit }, userInfo) {
     // es6参数解构，取userInfo里的username，password
     const { username, password } = userInfo
@@ -53,9 +51,9 @@ const actions = {
   },
 
   // get user info
-  getInfo({ commit, state }) {
+  getUserInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      getinfo(state.token).then(response => {
+      getUserInfo(state.token).then(response => {
         const { username, avatar, role } = response.userinfo
         if (response.code == 0) {
           // 验证失败，请重新登录。
@@ -73,38 +71,15 @@ const actions = {
         reject('登录失效，请重新登录!')
       })
     })
-    // return new Promise((resolve, reject) => {
-    //   getInfo(state.token).then(response => {
-    //     const { data } = response
-    //     if (!data) {
-    //       // 验证失败，请重新登录。
-    //       reject('Verification failed, please Login again.')
-    //     }
-    //     // es6参数解构，获取用户名，头像
-    //     const { name, avatar } = data
-    //     // 保存状态
-    //     commit('SET_NAME', name)
-    //     commit('SET_AVATAR', avatar)
-    //     // 返回成功的数据
-    //     resolve(data)
-    //   }).catch(error => {
-    //     reject(error)
-    //   })
-    // })
   },
 
   // user logout
   logout({ commit, state }) {
     return new Promise((resolve, reject) => {
-      // logout(state.token).then(() => {
       commit('SET_TOKEN', '')
       removeToken()
       resetRouter()
       resolve()
-      // })
-      // .catch(error => {
-      //   reject(error)
-      // })
     })
   },
 

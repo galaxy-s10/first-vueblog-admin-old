@@ -4,6 +4,10 @@
 @import './element-ui.scss';
 @import './sidebar.scss';
 
+// 解决el-dialog的抖动问题
+.el-popup-parent--hidden {
+  overflow: auto !important;
+}
 body {
   height: 100%;
   -moz-osx-font-smoothing: grayscale;

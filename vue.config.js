@@ -47,14 +47,6 @@ module.exports = {
           '^/api': ''
         }
       }
-      // '/api': {
-      //   target: `http://localhost:3000`,
-      //   // target: `http://47.100.90.12:3000`,
-      //   changeOrigin: true,
-      //   pathRewrite: {
-      //     '^/api': ''
-      //   }
-      // }
     }
   },
   configureWebpack: {

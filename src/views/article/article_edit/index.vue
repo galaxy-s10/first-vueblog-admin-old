@@ -4,17 +4,34 @@
       <el-form-item label="id" hidden>
         <el-input v-model="form.id" />
       </el-form-item>
-      <el-form-item label="标题">
+      <el-form-item label="标题" prop="title">
         <el-input v-model="form.title" />
       </el-form-item>
-      <el-form-item label="分类">
+      <el-form-item label="分类" prop="type">
         <el-input v-model="form.type" />
       </el-form-item>
+      <el-form-item label="标签">
+        <div class="tag" v-if="tagList.length">
+          <el-tooltip
+            v-for="item in tagList"
+            :key="item.id"
+            :content="showColor(item.id,item.color) == 'white'?'点击选中':'点击取消'"
+            placement="top"
+            effect="dark"
+          >
+            <el-tag
+              class="tag-margin"
+              :class="{activeTag:showColor(item.id,item.color) != 'white'}"
+              :disable-transitions="false"
+              :color="showColor(item.id,item.color)"
+              @click="tagClick(item)"
+            >{{item.name}}</el-tag>
+          </el-tooltip>
+        </div>
+        <div v-else>暂无标签可选</div>
+      </el-form-item>
       <el-form-item label="内容">
-        <!-- tinymce -->
-        <!-- <tinymceeditor id="tinymce" v-model="form.content" :init="init" /> -->
-        <!-- <tinymce1 ref="con" /> -->
-        <markdown ref="con" />
+        <markdown ref="md" v-if="this.form.content !=null" />
       </el-form-item>
       <el-form-item label="时间" prop="date">
         <!-- 日期时间选择器 -->
@@ -26,22 +43,8 @@
         />
       </el-form-item>
       <el-form-item label="封面图">
-        <!-- 图片上传 -->
-        <el-upload
-          :http-request="handleUpload"
-          :on-remove="handleRemove"
-          :on-exceed="handleExceed"
-          class="upload-demo"
-          list-type="picture-card"
-          action
-          :file-list="oldimg"
-          :limit="1"
-        >
-          <!-- <el-button size="small" type="primary">点击上传</el-button> -->
-          <i class="el-icon-plus"></i>
-        </el-upload>
+        <upload-com ref="uploadCom" :imgList="headerImg"></upload-com>
         {{this.newimg}}
-        <!-- {{this.oldimg[0].url}} -->
         <el-progress :text-inside="true" :stroke-width="18" :percentage="jindu" />
       </el-form-item>
       <el-form-item>
@@ -52,196 +55,195 @@
 </template>
 
 <script>
-import axios from "axios";
-// 引入封装好的tinymce
-import tinymce1 from "../../tinymce/tinymce.vue";
-import markdown from "../../markdown";
-// 引入api
-import { findarticle, editarticle } from "@/api/article";
-import { qiniutoken, delqiniuimg } from "@/api/qiniu";
-// 引入七牛云
-import * as qiniu from "qiniu-js";
+import markdown from "@/components/markdown";
+import uploadCom from "@/components/upload/index";
+import { findArticle, editArticle } from "@/api/article";
+import { taglist } from "@/api/tag";
+import { delQiniuImg } from "@/api/qiniu";
+import { format } from "@/utils/format.js";
 
 export default {
-  components: { tinymce1, markdown },
+  components: { markdown, uploadCom },
   data() {
     return {
+      tagList: [],
       form: {
         id: "",
         title: "",
+        tagList: [],
         type: "",
         content: "",
         date: "",
         img: null
       },
-      oldimg: [],
+      headerImg: [],
+      oldImgList: [],
       newimg: null,
       rules: {
-        date: [{ required: true, message: "请填写日期时间" }]
+        title: [
+          { required: true, message: "请填写标题" },
+          {
+            min: 3,
+            max: 20,
+            message: "标题长度要求在 3 到 20 个字符",
+            trigger: "blur"
+          }
+        ],
+        type: [
+          { required: true, message: "请填写分类" },
+          {
+            min: 2,
+            max: 5,
+            message: "分类长度要求在 2 到 5 个字符",
+            trigger: "blur"
+          }
+        ],
+        date: [
+          { required: true, message: "请填写日期时间" },
+          {
+            min: 3,
+            max: 20,
+            message: "日期时间长度要求在 3 到 20 个字符",
+            trigger: "blur"
+          }
+        ]
       },
       token: "",
       jindu: 0
     };
   },
-  mouted() {},
-  created() {
-    findarticle(this.$route.params.id)
+  computed: {
+    showColor(id, color) {
+      return (id, color) => {
+        // if (this.form.tagList.length != 0) {
+        function exist(arr) {
+          for (let i = 0; i < arr.length; i++) {
+            if (arr[i].id == id) {
+              return true;
+            }
+          }
+          return false;
+        }
+        const res = exist(this.form.tagList);
+        return res ? color : "white";
+        // }
+      };
+    }
+  },
+  mounted() {
+    findArticle(this.$route.params.id)
       .then(res => {
         this.form.id = res.list.rows[0].id;
         this.form.title = res.list.rows[0].title;
         this.form.type = res.list.rows[0].type;
-        this.$refs["con"].content = res.list.rows[0].content;
-        // this.form.content = res.list.rows[0].content
-        this.form.date = res.list.rows[0].date;
-        this.form.date = this.dateFormat(this.form.date);
-        // this.form.img = res.list.rows[0].img;
+        this.form.tagList = res.list.rows[0].tags;
+        this.form.date = format(res.list.rows[0].date);
+        this.form.content = res.list.rows[0].content;
+        // 设置mardown编辑器内容
+        this.$refs["md"].content = res.list.rows[0].content;
+        // 保存文章所有图片
+        this.oldImgList = this.regMd(res.list.rows[0].content);
+        // 保存封面图
         if (res.list.rows[0].img) {
-          console.log(res.list.rows[0].img);
-          console.log("121111111111111");
-          this.oldimg.push({
-            name: res.list.rows[0].img,
-            url: res.list.rows[0].img
-          });
-          console.log(this.oldimg[0].url);
-          this.newimg = res.list.rows[0].img;
-          console.log("===========");
+          this.headerImg.push({ name: "", url: res.list.rows[0].img });
         }
       })
       .catch(err => {
         console.log(err);
       });
   },
+  async created() {
+    await taglist().then(res => {
+      this.tagList = res.rows;
+    });
+  },
   methods: {
-    // 格式化时间
-    dateFormat: function(time) {
-      var date = new Date(time);
-      var year = date.getFullYear();
-      /* 在日期格式中，月份是从0开始的，因此要加0
-       * 使用三元表达式在小于10的前面加0，以达到格式统一  如 09:11:05
-       * */
-      var month =
-        date.getMonth() + 1 < 10
-          ? "0" + (date.getMonth() + 1)
-          : date.getMonth() + 1;
-      var day = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
-      var hours =
-        date.getHours() < 10 ? "0" + date.getHours() : date.getHours();
-      var minutes =
-        date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
-      var seconds =
-        date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
-      // 拼接
-      return (
-        year +
-        "-" +
-        month +
-        "-" +
-        day +
-        " " +
-        hours +
-        ":" +
-        minutes +
-        ":" +
-        seconds
-      );
+    tagClick(item) {
+      const id = item.id;
+      function exist(arr, val) {
+        for (let i = 0; i < arr.length; i++) {
+          if (arr[i].id == val) {
+            return i;
+          }
+        }
+        return false;
+      }
+      const res = exist(this.form.tagList, id);
+      if (res === false) {
+        this.form.tagList.push(item);
+      } else {
+        this.form.tagList.splice(res, 1);
+      }
     },
-    // 覆盖默认的上传行为，可以自定义上传的实现
-    handleUpload(res) {
-      let formData = new FormData();
-      formData.append("avatar", res.file);
-      console.log(res.file);
-      this.newimg = formData;
+    //正则匹配编辑器里的所有图片
+    regMd(content) {
+      const reg = /https:\/\/img.cdn.zhengbeining.com\/.+?(jpg|png|jpeg)/g;
+      const val = content.match(reg);
+      return val;
     },
-    // 文件列表移除文件时的钩子
-    handleRemove() {
-      this.newimg = null;
-    },
-    // 文件超出个数限制时的钩子
-    handleExceed() {
-      this.$message({
-        message: "只能上传一张封面图",
-        type: "error"
-      });
-    },
-    // 修改文章
-    async editarticle(data) {
-      console.log("开始修改文章");
-      console.log(this.$refs.form.model);
-      var res = await editarticle(data);
-      console.log(res);
-      console.log("修改文章完成！");
-      this.$message({
-        message: res,
-        type: "success"
-      });
+    // 删除七牛云图片
+    delQiniuImg(filename) {
+      delQiniuImg(filename.slice(33))
+        .then(res => {
+          console.log("删除七牛云图片成功");
+        })
+        .catch(err => {
+          console.log("删除七牛云图片错误");
+        });
     },
     onSubmit() {
       // 验证表单数据
-      this.form.content = this.$refs.con.content;
-      // this.form.content = this.$refs['con'].content
       this.$refs["form"].validate(async valid => {
         if (valid) {
-          console.log("表单验证通过！");
           if (this.$store.state.user.role != "admin") {
             this.$message({
               message: "您没权限修改哦~",
               type: "warning"
             });
           } else {
-            if (this.oldimg.length == 0) {
-              // if (this.oldimg.length == 0 && this.newimg != null) {
-              if (this.newimg != null) {
-                // 原本没有封面图的不用删直接上传新封面图，再修改数据库
-                console.log(this.newimg);
-                console.log;
-                console.log(
-                  "原本没有封面图的不用删直接上传新封面图，再修改数据库"
-                );
-                const config = {
-                  headers: {
-                    "Content-Type": "multipart/form-data"
-                  }
-                };
-                var file = await axios.post("/api/upload", this.newimg, config);
-                var filename = file.data.file.filename;
-                this.form.img = "/api/" + filename;
-                await this.editarticle(this.form);
-              } else {
-                console.log("111111111");
-                this.form.img = null;
-                this.editarticle(this.form);
-              }
-            } else {
-              console.log("sssssssssssssss");
-              console.log(this.oldimg[0].name);
-              console.log(this.newimg);
-              if (this.newimg == null) {
-                // 如果只删除七牛云图片，除了修改数据库还要把七牛云图片删了
-                console.log(
-                  "如果只删除七牛云图片，除了修改数据库还要把七牛云图片删了"
-                );
-                this.form.img = null;
-                this.editarticle(this.form);
-              }
-              if (this.oldimg[0].name != this.newimg) {
-                // 原本有封面图的先删除旧封面图再上传新封面图，再修改数据库
-                console.log("22222222222222");
-                const config = {
-                  headers: {
-                    "Content-Type": "multipart/form-data"
-                  }
-                };
-                var file = await axios.post("/api/upload", this.newimg, config);
-                var filename = file.data.file.filename;
-                this.form.img = "/api/" + filename;
-                await this.editarticle(this.form);
-              } else {
-                console.log("sdfsdgd");
-                console.log(this.oldimg[0].name);
-                this.form.img = this.oldimg[0].name;
-                this.editarticle(this.form);
-              }
+            // 修改后的内容
+            this.form.content = this.$refs.md.content;
+            // 修改后的文章图片
+            var articleImgs = this.regMd(this.$refs.md.content);
+            articleImgs = articleImgs == null ? [] : articleImgs;
+            var oldImgList = this.oldImgList;
+            oldImgList = oldImgList == null ? [] : oldImgList;
+            const delImgs = oldImgList.filter(function(val) {
+              return articleImgs.indexOf(val) === -1;
+            });
+            delImgs.forEach(val => {
+              this.delQiniuImg(val);
+            });
+            // 修改后的封面图
+            if (
+              this.form.img != null &&
+              this.$refs.uploadCom.imgList.length != 0
+            ) {
+              this.form.img = this.$refs.uploadCom.imgList[0].url;
             }
+            if (
+              this.form.img != null &&
+              this.$refs.uploadCom.imgList.length == 0
+            ) {
+              this.form.img = null;
+            }
+            if (
+              this.form.img == null &&
+              this.$refs.uploadCom.imgList.length != 0
+            ) {
+              this.form.img = this.$refs.uploadCom.imgList[0].url;
+            }
+            editArticle(this.form)
+              .then(res => {
+                this.$message({
+                  message: res,
+                  type: "success"
+                });
+                this.$router.push({ name: "Article" });
+              })
+              .catch(err => {
+                console.log(err);
+              });
           }
         } else {
           alert("请填写完整！");
@@ -253,3 +255,26 @@ export default {
 };
 </script>
 
+<style scoped>
+.activeTag {
+  color: white !important;
+}
+.tag /deep/ .el-tag {
+  background-color: white;
+  color: black;
+}
+.tag /deep/ .el-tag:hover {
+  cursor: pointer;
+}
+.tag /deep/ .el-tag .el-icon-close {
+  color: white;
+}
+.tag /deep/ .el-tag .el-icon-close:hover {
+  background-color: transparent;
+}
+.tag-margin {
+  /* color:black; */
+  display: inline-block;
+  margin: 5px 10px;
+}
+</style>

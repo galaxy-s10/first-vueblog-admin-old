@@ -56,36 +56,15 @@
 </template>
 
 <script>
-// import { validUsername } from '@/utils/validate'
 
 export default {
   name: "Login",
   data() {
-    // 自定义elementui验证规则
-    // const validateUsername = (rule, value, callback) => {
-    //   if (!validUsername(value)) {
-    //     callback(new Error('Please enter the correct user name'))
-    //   } else {
-    //     callback()
-    //   }
-    // }
-    // 自定义elementui验证规则
-    // const validatePassword = (rule, value, callback) => {
-    //   if (value.length < 6) {
-    //     callback(new Error('The password can not be less than 6 digits'))
-    //   } else {
-    //     callback()
-    //   }
-    // }
     return {
       loginForm: {
         username: "",
         password: ""
       },
-      // loginRules: {
-      //   username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-      //   password: [{ required: true, trigger: 'blur', validator: validatePassword }]
-      // },
       loading: false,
       passwordType: "password",
       redirect: undefined
@@ -128,12 +107,6 @@ export default {
             type: "error"
           });
         });
-      // }
-      // else {
-      //   console.log('error submit!!')
-      //   return false
-      // }
-      // })
     }
   }
 };

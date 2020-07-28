@@ -29,7 +29,7 @@ router.beforeEach(async (to, from, next) => {
     }else{
       try {
         // get user info
-        var ress = await store.dispatch('user/getInfo')
+        var ress = await store.dispatch('user/getUserInfo')
         next()
       } catch (error) {
         // remove token and go to login page to re-login
