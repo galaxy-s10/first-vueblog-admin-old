@@ -52,7 +52,7 @@
 // 引入api
 import { addArticle } from "@/api/article";
 import { taglist } from "@/api/tag";
-import uploadCom from "@/components/upload/index";
+import uploadCom from "@/components/upload";
 import markdown from "@/components/markdown";
 export default {
   components: { markdown, uploadCom },
@@ -69,7 +69,7 @@ export default {
         type: "",
         content: "",
         date: "",
-        img: null
+        img: null,
       },
       rules: {
         title: [
@@ -78,8 +78,8 @@ export default {
             min: 3,
             max: 20,
             message: "标题长度要求在 3 到 20 个字符",
-            trigger: "blur"
-          }
+            trigger: "blur",
+          },
         ],
         type: [
           { required: true, message: "请填写分类" },
@@ -87,8 +87,8 @@ export default {
             min: 2,
             max: 5,
             message: "分类长度要求在 2 到 5 个字符",
-            trigger: "blur"
-          }
+            trigger: "blur",
+          },
         ],
         date: [
           { required: true, message: "请填写日期时间" },
@@ -96,10 +96,10 @@ export default {
             min: 3,
             max: 20,
             message: "日期时间长度要求在 3 到 20 个字符",
-            trigger: "blur"
-          }
-        ]
-      }
+            trigger: "blur",
+          },
+        ],
+      },
     };
   },
   computed: {
@@ -107,7 +107,7 @@ export default {
       return (id, color) => {
         return this.selectTagList.indexOf(id) == -1 ? "white" : color;
       };
-    }
+    },
   },
   created() {
     this.getTagList();
@@ -123,19 +123,19 @@ export default {
       }
     },
     getTagList() {
-      taglist().then(res => {
+      taglist().then((res) => {
         this.tagList = res.rows;
       });
     },
     onSubmit() {
       // 验证表单数据
       this.form.content = this.$refs["md"].content;
-      this.$refs["form"].validate(valid => {
+      this.$refs["form"].validate((valid) => {
         if (valid) {
           if (this.$store.state.user.role != "admin") {
             this.$message({
               message: "您没权限发送哦~",
-              type: "warning"
+              type: "warning",
             });
           } else {
             this.form.tagList = this.selectTagList;
@@ -145,24 +145,25 @@ export default {
               this.form.img = null;
             }
             addArticle(this.form)
-              .then(res => {
+              .then((res) => {
                 this.$message({
                   message: "发表文章成功！",
-                  type: "success"
+                  type: "success",
                 });
                 this.$router.push({ name: "Article" });
               })
-              .catch(err => {
+              .catch((err) => {
                 console.log(err);
               });
           }
         } else {
-          alert("请填写完整！");
-          return false;
+          this.$alert("请填写完整！", "提示", {
+            confirmButtonText: "确定",
+          });
         }
       });
-    }
-  }
+    },
+  },
 };
 </script>
 

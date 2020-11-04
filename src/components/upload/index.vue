@@ -17,6 +17,7 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 import { getQiniuToken, delQiniuImg } from "@/api/qiniu";
 // 引入七牛云
 import * as qiniu from "qiniu-js";
@@ -26,7 +27,7 @@ export default {
   props: {
     imgList: {
       type: Array,
-      default: function() {
+      default: function () {
         return [
           // {
           //   name: "",
@@ -34,15 +35,16 @@ export default {
           //     "https://img.cdn.lsyblog.com/007X8olVly1g7hxjawgyfj306o06ojra.jpg"
           // }
         ];
-      }
-    }
+      },
+    },
   },
   data() {
     return {
       //   imgList: [],
-      img: null
+      img: null,
     };
   },
+  computed: {},
   methods: {
     // 获取七牛云上传凭证
     async getQiniuToken() {
@@ -59,7 +61,7 @@ export default {
       const putExtra = {};
       const config = { useCdnDomain: true };
       const observable = qiniu.upload(file, key, uptoken, putExtra, config);
-      return new Promise(function(resolve, reject) {
+      return new Promise(function (resolve, reject) {
         const subscription = observable.subscribe({
           // next: 接收上传进度信息的回调函数
           next(res) {
@@ -75,7 +77,7 @@ export default {
           complete(ress) {
             console.log("上传七牛云图片成功");
             resolve("https://img.cdn.zhengbeining.com/" + ress.key);
-          }
+          },
         });
       });
     },
@@ -86,24 +88,23 @@ export default {
     },
     // 覆盖默认的上传行为，可以自定义上传的实现
     handleUpload({ file }) {
-      console.log(file);
       this.imgList.shift();
       this.qiniuUpload(file.name, file)
-        .then(res => {
+        .then((res) => {
           this.imgList.push({ name: "", url: res });
         })
-        .catch(err => {
+        .catch((err) => {
           console.log(err);
         });
     },
     // 删除七牛云图片
     async qiniuDel(filename) {
-      return new Promise(function(resolve, reject) {
+      return new Promise(function (resolve, reject) {
         delQiniuImg(filename.slice(33))
-          .then(res => {
+          .then((res) => {
             resolve("删除七牛云图片成功");
           })
-          .catch(err => {
+          .catch((err) => {
             reject("删除七牛云图片错误");
           });
       });
@@ -112,17 +113,17 @@ export default {
     handleRemove(file) {
       if (file.name.length <= 15) {
         this.qiniuDel(this.imgList[0].url)
-          .then(res => {
+          .then((res) => {
             this.imgList.shift();
             console.log(res);
           })
-          .catch(err => {
+          .catch((err) => {
             console.log(err);
           });
       } else {
         this.$message({
           message: "文件名不能大于十五个字符!",
-          type: "error"
+          type: "error",
         });
       }
     },
@@ -130,10 +131,10 @@ export default {
     handleExceed() {
       this.$message({
         message: "只能上传一张封面图",
-        type: "error"
+        type: "error",
       });
-    }
-  }
+    },
+  },
 };
 </script>
 

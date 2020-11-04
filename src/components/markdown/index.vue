@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 import { mavonEditor } from "mavon-editor";
 import { getQiniuToken, delQiniuImg } from "@/api/qiniu";
 // 引入七牛云
@@ -19,8 +20,13 @@ export default {
   data() {
     return {
       qiniuToken: null,
-      content: ""
+      content: "",
     };
+  },
+  computed: {
+    ...mapState({
+      role: (state) => state.user.role,
+    }),
   },
   created() {},
   mounted() {},
@@ -40,7 +46,7 @@ export default {
       const putExtra = {};
       const config = { useCdnDomain: true };
       const observable = qiniu.upload(file, key, uptoken, putExtra, config);
-      return new Promise(function(resolve, reject) {
+      return new Promise(function (resolve, reject) {
         const subscription = observable.subscribe({
           // next: 接收上传进度信息的回调函数
           next(res) {
@@ -56,51 +62,60 @@ export default {
           complete(ress) {
             console.log("上传七牛云图片成功");
             resolve("https://img.cdn.zhengbeining.com/" + ress.key);
-          }
+          },
         });
       });
     },
     // 删除七牛云图片
     async qiniuDel(filename) {
-      return new Promise(function(resolve, reject) {
+      return new Promise(function (resolve, reject) {
         delQiniuImg(filename.slice(33))
-          .then(res => {
+          .then((res) => {
             resolve("删除七牛云图片成功");
           })
-          .catch(err => {
+          .catch((err) => {
             reject("删除七牛云图片错误");
           });
       });
     },
     async imgAdd(filename, file) {
-      console.log("imgAdd");
-      if (filename && file) {
-        this.qiniuUpload(filename, file)
-          .then(res => {
-            this.$refs.md.$img2Url(filename, res);
-          })
-          .catch(err => {
-            console.log(err);
-          });
-      } else {
-        const reg = /(?<=(https:\/\/img.cdn.zhengbeining.com\/)).+?(jpg|png|jpeg)/g;
-        console.log(filename.match(reg));
-        var item = filename.match(reg);
-        console.log(item[0], filename);
-        this.$refs.md.$img2Url(item[0], filename);
-      }
-    },
-    imgDel(filename) {
-      console.log("imgDel");
-      this.qiniuDel(filename[0])
-        .then(res => {
-          console.log(res);
+      // if (this.role != "admin") {
+      //   this.$refs.md.$img2Url(filename, null);
+      //   this.$message({
+      //     message: "您没权限上传图片哦~",
+      //     type: "warning",
+      //   });
+      // } else {
+      // if (filename && file) {
+      this.qiniuUpload(filename, file)
+        .then((res) => {
+          this.$refs.md.$img2Url(filename, res);
         })
-        .catch(err => {
+        .catch((err) => {
+          console.log("dfg");
           console.log(err);
         });
-    }
-  }
+      // } else {
+      //   const reg = /(?<=(https:\/\/img.cdn.zhengbeining.com\/)).+?(jpg|png|jpeg)/g;
+      //   console.log(filename.match(reg));
+      //   var item = filename.match(reg);
+      //   console.log(item[0], filename);
+      //   this.$refs.md.$img2Url(item[0], filename);
+      // }
+      // }
+    },
+    imgDel(filename) {
+      if (typeof filename[0] != "number") {
+        this.qiniuDel(filename[0])
+          .then((res) => {
+            console.log(res);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+    },
+  },
 };
 </script>
 

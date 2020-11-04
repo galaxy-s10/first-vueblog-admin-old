@@ -53,10 +53,9 @@ service.interceptors.response.use(
   error => {
     console.log(error) // for debug
     Message({
-      message: error.response.data,
-      // message: '账号或密码错误！！！',
+      message: error.response.data.message,
       type: 'error',
-      duration: 1 * 1000
+      duration: 1000
     })
     return Promise.reject(error.response.data)
   }

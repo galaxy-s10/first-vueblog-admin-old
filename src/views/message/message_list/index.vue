@@ -5,7 +5,6 @@
       :data="list"
       row-key="id"
       element-loading-text="Loading"
-      border
       fit
       highlight-current-row
     >
@@ -49,7 +48,7 @@ export default {
   data() {
     return {
       list: null,
-      listLoading: true
+      listLoading: true,
     };
   },
   created() {
@@ -57,7 +56,7 @@ export default {
   },
   methods: {
     // 格式化日期时间
-    dateFormat: function(time) {
+    dateFormat: function (time) {
       var date = new Date(time);
       var year = date.getFullYear();
       /* 在日期格式中，月份是从0开始的，因此要加0
@@ -92,7 +91,7 @@ export default {
     // 留言列表
     fetchData() {
       this.listLoading = true;
-      commentlist(-1).then(response => {
+      commentlist(-1).then((response) => {
         this.list = response.lists;
         this.listLoading = false;
       });
@@ -102,36 +101,36 @@ export default {
       this.$confirm("是否永久删除该留言", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
-        type: "warning"
+        type: "warning",
       })
         .then(() => {
           delmessage(id)
-            .then(res => {
+            .then((res) => {
               if (res.code === 20000) {
                 this.$message({
                   message: res.data,
-                  type: "success"
+                  type: "success",
                 });
               } else {
                 this.$message({
                   message: res.data,
-                  type: "error"
+                  type: "error",
                 });
               }
               this.fetchData();
             })
-            .catch(err => {
+            .catch((err) => {
               console.log(err);
             });
         })
         .catch(() => {
           this.$message({
             type: "info",
-            message: "已取消删除"
+            message: "已取消删除",
           });
         });
-    }
-  }
+    },
+  },
 };
 </script>
 

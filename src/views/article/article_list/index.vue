@@ -4,7 +4,6 @@
       v-loading="listLoading"
       :data="list"
       element-loading-text="Loading"
-      border
       fit
       highlight-current-row
     >
@@ -53,7 +52,7 @@ export default {
     return {
       qiniuToken: null,
       list: null,
-      listLoading: true
+      listLoading: true,
     };
   },
   created() {
@@ -62,12 +61,12 @@ export default {
   methods: {
     // 删除七牛云图片
     async delQiniuImg(filename) {
-      return new Promise(function(resolve, reject) {
+      return new Promise(function (resolve, reject) {
         delQiniuImg(filename.slice(33))
-          .then(res => {
+          .then((res) => {
             resolve(res);
           })
-          .catch(err => {
+          .catch((err) => {
             reject("删除七牛云图片错误");
           });
       });
@@ -75,11 +74,11 @@ export default {
     getArticleList() {
       this.listLoading = true;
       articleList()
-        .then(res => {
+        .then((res) => {
           this.list = res.list.rows;
           this.listLoading = false;
         })
-        .catch(err => {
+        .catch((err) => {
           console.log(err);
         });
     },
@@ -116,49 +115,49 @@ export default {
         seconds
       );
     },
-    delArticle: function(id, mdContent, img) {
+    delArticle: function (id, mdContent, img) {
       this.$confirm("是否永久删除该文章", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
-        type: "warning"
+        type: "warning",
       })
         .then(() => {
           const reg = /https:\/\/img.cdn.zhengbeining.com\/.+?(jpg|png|jpeg)/g;
           const qiniuImgs = mdContent.match(reg);
           if (qiniuImgs) {
-            qiniuImgs.forEach(item => {
-              this.delQiniuImg(item).then(res => {
+            qiniuImgs.forEach((item) => {
+              this.delQiniuImg(item).then((res) => {
                 console.log(res);
               });
             });
           }
           if (img) {
-            this.delQiniuImg(img).then(res => {
+            this.delQiniuImg(img).then((res) => {
               console.log(res);
             });
           }
           delArticle(id)
-            .then(res => {
+            .then((res) => {
               this.$message({
                 message: res,
-                type: "success"
+                type: "success",
               });
               this.getArticleList();
             })
-            .catch(err => {
+            .catch((err) => {
               this.$notify.error({
                 title: "错误",
-                message: "删除文章失败！"
+                message: "删除文章失败！",
               });
             });
         })
         .catch(() => {
           this.$message({
             type: "info",
-            message: "已取消删除"
+            message: "已取消删除",
           });
         });
-    }
-  }
+    },
+  },
 };
 </script>

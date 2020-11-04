@@ -64,7 +64,7 @@ export default {
         name: "",
         avatar: "",
         description: "",
-        url: ""
+        url: "",
       },
       linkList: [],
       rules: {
@@ -74,8 +74,8 @@ export default {
             min: 3,
             max: 10,
             message: "长度在 3 到 10 个字符",
-            trigger: "blur"
-          }
+            trigger: "blur",
+          },
         ],
         avatar: [
           { required: true, message: "请填写友链头像！", trigger: "blur" },
@@ -83,8 +83,8 @@ export default {
             min: 10,
             max: 150,
             message: "长度在 10 到 150 个字符",
-            trigger: "blur"
-          }
+            trigger: "blur",
+          },
         ],
         description: [
           { required: true, message: "请填写友链描述！", trigger: "blur" },
@@ -92,8 +92,8 @@ export default {
             min: 3,
             max: 30,
             message: "长度在 3 到 30 个字符",
-            trigger: "blur"
-          }
+            trigger: "blur",
+          },
         ],
         url: [
           { required: true, message: "请填写友链地址！", trigger: "blur" },
@@ -101,10 +101,10 @@ export default {
             min: 10,
             max: 50,
             message: "长度在 10 到 50 个字符",
-            trigger: "blur"
-          }
-        ]
-      }
+            trigger: "blur",
+          },
+        ],
+      },
     };
   },
   created() {
@@ -116,7 +116,7 @@ export default {
       this.currentAvatar = avatar;
     },
     getAllLink() {
-      linklist().then(res => {
+      linklist().then((res) => {
         this.linkList = res.rows;
       });
     },
@@ -127,7 +127,7 @@ export default {
         name: "",
         avatar: "",
         description: "",
-        url: ""
+        url: "",
       };
     },
     handleEdit(link) {
@@ -139,29 +139,29 @@ export default {
       this.$confirm("确认删除: ' " + link.name + " ' 友链吗？", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
-        type: "warning"
+        type: "warning",
       })
         .then(() => {
           dellink(link.id)
-            .then(res => {
+            .then((res) => {
               this.$message({
                 message: "删除友链成功！",
-                type: "success"
+                type: "success",
               });
               this.getAllLink();
             })
-            .catch(err => {
+            .catch((err) => {
               this.$notify.error({
                 title: "错误",
-                message: "删除友链失败！"
+                message: "删除友链失败！",
               });
               this.getAllLink();
             });
         })
-        .catch(err => {
+        .catch((err) => {
           this.$message({
             message: "已取消删除~",
-            type: "warning"
+            type: "warning",
           });
         });
     },
@@ -169,72 +169,72 @@ export default {
       this.dialogFormVisible = false;
     },
     successAction(linkForm) {
-      this.$refs["form"].validate(valid => {
+      this.$refs["form"].validate((valid) => {
         if (valid) {
           if (this.addOrEdit == "add") {
-            this.$refs["form"].validate(valid => {
+            this.$refs["form"].validate((valid) => {
               this.$confirm("确认添加吗？", {
                 confirmButtonText: "确定",
                 cancelButtonText: "取消",
-                type: "warning"
+                type: "warning",
               })
                 .then(() => {
                   addlink(this.linkForm)
-                    .then(res => {
+                    .then((res) => {
                       this.$message({
                         message: "添加友链成功！",
-                        type: "success"
+                        type: "success",
                       });
                       this.getAllLink();
                       this.dialogFormVisible = false;
                     })
-                    .catch(err => {
+                    .catch((err) => {
                       this.$notify.error({
                         title: "错误",
-                        message: "添加友链失败！"
+                        message: "添加友链失败！",
                       });
                       this.getAllLink();
                       this.dialogFormVisible = false;
                     });
                 })
-                .catch(err => {});
+                .catch((err) => {});
             });
           } else {
             this.$confirm("确认修改吗？", {
               confirmButtonText: "确定",
               cancelButtonText: "取消",
-              type: "warning"
+              type: "warning",
             })
               .then(() => {
                 editlink(this.linkForm)
-                  .then(res => {
+                  .then((res) => {
                     this.$message({
                       message: "修改友链成功！",
-                      type: "success"
+                      type: "success",
                     });
                     this.getAllLink();
                     this.dialogFormVisible = false;
                   })
-                  .catch(err => {
+                  .catch((err) => {
                     this.$notify.error({
                       title: "错误",
-                      message: "修改友链失败！"
+                      message: "修改友链失败！",
                     });
                     this.getAllLink();
                     this.dialogFormVisible = false;
                   });
               })
-              .catch(err => {});
+              .catch((err) => {});
           }
         } else {
           this.$message({
             message: "请输入完整的友链信息！",
-            type: "error"
+            type: "error",
           });
         }
       });
-    }
-  }
+    },
+  },
 };
 </script>
 
