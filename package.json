@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@tinymce/tinymce-vue": "^3.0.1",
-    "axios": "0.18.1",
+    "axios": "1.6.0",
     "element-ui": "2.7.2",
     "js-cookie": "2.2.0",
     "mavon-editor": "^2.7.7",
